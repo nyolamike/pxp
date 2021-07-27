@@ -199,6 +199,114 @@ pxpRefresh(){
   pxp.router.refreshPage();
 }
 
+//we need to navigat to a certain url withoud causing a browser reload
+//internall the goToRoute will call the gotoPage method after it has 
+//successfully matched a url to a page
+pxp.router.goToRoute = function (url, data) {
+  var queryParams = {}; //passed in after the ? e.g /students?orderBy=desc&gropuBy=classroom
+  var urlParams = {};  //passed in as :paramName  e.g /students/23 from the urlTemplate /students/:id
+  
+  //extract the query params from the url
+  var urlParts = url.split("?");
+  var currentUrlPart = urlParts[0];
+  
+  if (urlParts.length > 1) {
+        //so we have entries after the ? in the url
+        var queryParamsUrlPart = urlParts[1];
+        var queryParamsUrlParts = queryParamsUrlPart.split("&");
+        for (var index = 0; index < queryParamsUrlParts.length; index++) {
+            var queryKeyValueStr = queryParamsUrlParts[index];
+            var queryKeyValueStrParts = queryKeyValueStr.split("=");
+            var key = queryKeyValueStrParts[0].trim();
+            if (key.length == 0) {
+                continue;
+            }
+            queryParams[key] = undefined;
+            if (queryKeyValueStrParts.length > 1) {
+                var value = queryKeyValueStrParts[1].trim();
+                if (value.length > 0 && isNumeric(value)) {
+                    value = parseFloat(value);
+                }
+                queryParams[key] = value;
+            }
+        }
+    }
+            
+            
+          
+    var currentUrlParts = currentUrlPart.split("/")
+    var foundConfiguredRoute = null;
+    for (const pageName in pxp.router.routeTable) {
+        if (Object.hasOwnProperty.call(pxp.router.routeTable, pageName)) {
+            urlParams = {};
+            var pageRouteConfig = pxp.router.routeTable[pageName];
+            var pageRouteConfigParts = pageRouteConfig.urlTemplate.split("/");
+            //the length should be the same
+            if (pageRouteConfigParts.length != currentUrlParts.length) {
+                //this cannot match
+                continue;
+            }
+            var score = 0;
+            for (var index = 0; index < currentUrlParts.length; index++) {
+                var currentUrlPart = currentUrlParts[index];
+                var pageRouteConfigPart = pageRouteConfigParts[index];
+                var urlParamKey = "";
+                var urlParamValue = undefined;
+                if (pageRouteConfigPart[0] == ":") {
+                    urlParamKey = pageRouteConfigPart.replace(":", "").trim();
+                    urlParams[urlParamKey] = urlParamValue;
+                }
+
+                if (currentUrlPart != pageRouteConfigPart) {
+                    //well this may be because pageRouteConfigPart is a param variable e.g :id
+                    if (pageRouteConfigPart[0] == ":") {
+                        //then we have to believe that its okay
+                        if (currentUrlPart.length > 0 && isNumeric(currentUrlPart)) {
+                            urlParamValue = parseFloat(currentUrlPart);
+                        } else {
+                            urlParamValue = decodeQueryParam(currentUrlPart);
+                        }
+                        urlParams[urlParamKey] = urlParamValue;
+                        score = score + 1;
+                    } else {
+                        //this is not what we are looking for
+                        break;
+                    }
+                } else {
+                    if (pageRouteConfigPart[0] == ":") {
+                        urlParams[urlParamKey] = decodeQueryParam(currentUrlPart);
+                    }
+                    score = score + 1;
+                }
+            }
+            if (score == currentUrlParts.length) {
+                //we have found our route
+                foundConfiguredRoute = pageRouteConfig;
+                break;
+            }
+        }
+    }
+
+    if (foundConfiguredRoute == null && pxp.router.catchAllRoute != null) {
+        foundConfiguredRoute = pxp.router.catchAllRoute;
+    }
+
+    // console.log("found config route  ", foundConfiguredRoute, urlParams);
+    if (foundConfiguredRoute != null && Object.hasOwnProperty.call(foundConfiguredRoute, "redirectsTo")) {
+        //redirect 
+        pxp.router.goToRoute(foundConfiguredRoute.redirectsTo, data);
+    } else if (foundConfiguredRoute != null) {
+        var pageTitle = "";
+        if (Object.hasOwnProperty.call(foundConfiguredRoute, "title")) {
+            pageTitle = foundConfiguredRoute.title;
+        }
+        //nyd
+        //before enter
+
+        history.pushState({ link: url }, pageTitle, '/#' + url);
+        pxp.router.goToPage(foundConfiguredRoute.pageName, data, queryParams, urlParams);
+    }
+};
 
 
 
