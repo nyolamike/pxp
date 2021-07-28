@@ -325,5 +325,56 @@ pxp.router.goToRoute = function (url, data) {
 };
 
 
+//finally you want to render the page
+//rendering the page means inserting it into the pxp-app container
+//this method performes the following operations
+//1. gets the template of the page and inserts it into the traget container
+//   the target container could be the pxp-app or a master page content place holder, thats why we
+//   pass the insertInId parameter
+//2. It replaces any short hand like @pg with the current path to that page
+//3. It will run any scheduled bootscripts on the page after inserting the dome into the respective container
+//4. It then adds one way binding to any model inputs to their data states in the page
+//5. It then auto calls the onInseted methods of nay page sections if the seeting is true
+/**
+ * 
+ * @param {object} pageToLoadConfig The page to be inserted
+ * @param {string} insertInId The id of the dome element where the page template is to be inserted
+ * @param {object} data The data passed along
+ * @param {object} queryParams The query parameters from the url after the ?
+ * @param {object} urlParams the url params  from the urlTemplate in the route
+ */
+pxp.router.goToPage.renderPage = function(pageToLoadConfig, insertInId, data, queryParams, urlParams) {
+    //no master page
+    // console.log("The prob ", insertInId);
+    $("#" + insertInId).html("");
+    var rawPageHtml = pageToLoadConfig.getTemplate(data, queryParams, urlParams);
+    //replacing current page
+    if (rawPageHtml.indexOf("@pg.")) {
+        rawPageHtml = rawPageHtml.split("@pg.").join("pxp.pages." + pxp.currentPageName + ".");
+    }
+    $("#" + insertInId).html(rawPageHtml);
+    //run selected boot scripts
+    if (Object.hasOwnProperty.call(pageToLoadConfig, "bootScripts") &&
+        Object.hasOwnProperty.call(pageToLoadConfig.bootScripts, "length") &&
+        pageToLoadConfig.bootScripts.length > 0
+    ) {
+        for (var index = 0; index < pageToLoadConfig.bootScripts.length; index++) {
+            var bootScriptName = pageToLoadConfig.bootScripts[index];
+            pxp.runBootScript(bootScriptName, pageToLoadConfig);
+        }
+    }
+    //bind inputs
+    pxp.bindInputs();
+    //call the on inserted
+    if (Object.hasOwnProperty.call(pageToLoadConfig, "autoCallSectionsOnInserted") &&
+        pageToLoadConfig.autoCallSectionsOnInserted == true
+    ) {
+        pageToLoadConfig.onSectionsInserted(data, queryParams, urlParams);
+    }
+    pageToLoadConfig.onInserted(data, queryParams, urlParams);
+}
+
+
+
 
 
