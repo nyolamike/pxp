@@ -1,6 +1,12 @@
-//1. The pxp global object
+
+
+//1. The pxp global objects
 var pxp = {};
 window.pxp = pxp;
+
+//the current page is the page which is currently loaded in the pxp-app container
+currentPage = null;
+window.currentPage = null;
 
 
 
@@ -35,7 +41,6 @@ pxp.bootScripts = {};
 //to load boot scripts into pxp the method below is called
 //for examples
 /*
-
   pxp.setBoot("makeDataTables", function(pageConfig){
     //...any other code here
     
@@ -60,7 +65,7 @@ pxp.setBoot = function (key, scriptFn) {
 / @param {string} key        -The unique refrence key name for the bootscript
 / @param {object} pageConfig -The setup configuration object of the page that has just been insterted into the pxp-app container
 */
-pxp.runBootScript: function name(key, pageConfig) {
+pxp.runBootScript = function name(key, pageConfig) {
     var passedKey = key;
     key = key.trim().toLowerCase();
     if (Object.hasOwnProperty.call(this.bootScripts, key)) {
@@ -173,12 +178,12 @@ pxp.router.setRoutes = function (list) {
     for (var index = 0; index < list.length; index++) {
         var item = list[index];
         //a default page name if the route config is missing the pageName property
-        var pageName = 'routeIndex' + index + 'Page'; 
+        var pageName = 'routeIndex' + index + 'Page';
         if (Object.hasOwnProperty.call(item, "pageName")) {
             pageName = item.pageName;
         }
         //catch all route
-        if (item.urlTemplate == "*") { 
+        if (item.urlTemplate == "*") {
             pxp.router.catchAllRoute = {
                 pageName: item
             };
@@ -195,22 +200,32 @@ pxp.router.refreshPage = function () {
     return false;
 };
 //as a convinience method you can call pxpRefresh(); to do the same thing
-pxpRefresh(){
-  pxp.router.refreshPage();
+pxpRefresh = function(){
+    pxp.router.refreshPage();
 }
 
 //we need to navigat to a certain url withoud causing a browser reload
 //internall the goToRoute will call the gotoPage method after it has 
 //successfully matched a url to a page
+//internally this method will extract and formulate any parmeters and query data from the url
+//it will also perform any redirects were necessary and
+//also call the before enter logic if any was configured in the affected routes
+//when all goes well it calls the gotoPage method to finally load the page
+//if not it will try to load the 404 not found route
+/**
+ * 
+ * @param {string} url      The url to go to 
+ * @param {object} data     The payload to send along
+ */
 pxp.router.goToRoute = function (url, data) {
-  var queryParams = {}; //passed in after the ? e.g /students?orderBy=desc&gropuBy=classroom
-  var urlParams = {};  //passed in as :paramName  e.g /students/23 from the urlTemplate /students/:id
-  
-  //extract the query params from the url
-  var urlParts = url.split("?");
-  var currentUrlPart = urlParts[0];
-  
-  if (urlParts.length > 1) {
+    var queryParams = {}; //passed in after the ? e.g /students?orderBy=desc&gropuBy=classroom
+    var urlParams = {};  //passed in as :paramName  e.g /students/23 from the urlTemplate /students/:id
+
+    //extract the query params from the url
+    var urlParts = url.split("?");
+    var currentUrlPart = urlParts[0];
+
+    if (urlParts.length > 1) {
         //so we have entries after the ? in the url
         var queryParamsUrlPart = urlParts[1];
         var queryParamsUrlParts = queryParamsUrlPart.split("&");
@@ -231,9 +246,10 @@ pxp.router.goToRoute = function (url, data) {
             }
         }
     }
-            
-            
-          
+
+
+    //extract Url params
+    //and match url based on a score tally
     var currentUrlParts = currentUrlPart.split("/")
     var foundConfiguredRoute = null;
     for (const pageName in pxp.router.routeTable) {
@@ -307,6 +323,7 @@ pxp.router.goToRoute = function (url, data) {
         pxp.router.goToPage(foundConfiguredRoute.pageName, data, queryParams, urlParams);
     }
 };
+
 
 
 
