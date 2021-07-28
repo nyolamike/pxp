@@ -108,6 +108,14 @@ pxp.router.routeTable = {};
 */
 pxp.router.catchAllRoute = null;
 
+//we need to store the apps routes in this temporary 
+//this enables us to defer setting up the routes only when the pxp.run method is called
+pxp.router.rawRoutesList: [];
+
+//by default pxp will not define a global before enter call on routes
+//the user is free to provide an inplementation here but before calling the run method
+pxp.router.beforeEnter= null;
+
 //The routes of the application are setup by passing an array/list of route configuration objects to this method
 //this is done before calling the run method of pxp
 //for example 
@@ -319,11 +327,41 @@ pxp.router.goToRoute = function (url, data, queryParamsRepassed, urlParamsRepass
         if (Object.hasOwnProperty.call(foundConfiguredRoute, "title")) {
             pageTitle = foundConfiguredRoute.title;
         }
-        //nyd
+      
         //before enter
-
-        history.pushState({ link: url }, pageTitle, '/#' + url);
-        pxp.router.goToPage(foundConfiguredRoute.pageName, data, queryParams, urlParams);
+        var b4EnterArgs = {
+            route: JSON.parse(JSON.stringify(foundConfiguredRoute)),
+            data: data,
+            queryParams: queryParams,
+            urlParams: urlParams
+        };
+        if (typeof pxp.router.beforeEnter == 'function') {
+            //user has defined a global before enter function
+            //so we check if this route is into these things
+            if (Object.hasOwnProperty.call(foundConfiguredRoute, "beforeEnter") &&
+                foundConfiguredRoute.beforeEnter === true
+            ) {
+                //excute the routers global before Enter
+                pxp.router.beforeEnter(b4EnterArgs, proceed);
+            } else if (Object.hasOwnProperty.call(foundConfiguredRoute, "beforeEnter") &&
+                typeof foundConfiguredRoute.beforeEnter == "function"
+            ) {
+                //so we have a custome before enter logic, we need to call it before it's crazy 
+                foundConfiguredRoute.beforeEnter(b4EnterArgs, proceed);
+            }else{
+                proceed();
+            }
+        } else {
+            //so lets just consider this dude
+            if (Object.hasOwnProperty.call(foundConfiguredRoute, "beforeEnter") &&
+                typeof foundConfiguredRoute.beforeEnter == "function"
+            ) {
+                //so this means that this particular route has defined its own thing
+                foundConfiguredRoute.beforeEnter(b4EnterArgs, proceed);
+            } else {
+                proceed(); //we are go to go
+            }
+        }
     }
 };
 
