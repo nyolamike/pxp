@@ -110,7 +110,7 @@ pxp.router.catchAllRoute = null;
 
 //we need to store the apps routes in this temporary 
 //this enables us to defer setting up the routes only when the pxp.run method is called
-pxp.router.rawRoutesList: [];
+pxp.router.rawRoutesList = [];
 
 //by default pxp will not define a global before enter call on routes
 //the user is free to provide an inplementation here but before calling the run method
