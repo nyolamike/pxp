@@ -216,10 +216,13 @@ pxpRefresh = function(){
  * 
  * @param {string} url      The url to go to 
  * @param {object} data     The payload to send along
+ * @param {object} queryParamsRepassed    Optional [undefined] The previously passed queryParams
+ * @param {object} urlParamsRepassed      Optional [undefined] The previously passed urlParamsRepassed
  */
-pxp.router.goToRoute = function (url, data) {
-    var queryParams = {}; //passed in after the ? e.g /students?orderBy=desc&gropuBy=classroom
-    var urlParams = {};  //passed in as :paramName  e.g /students/23 from the urlTemplate /students/:id
+pxp.router.goToRoute = function (url, data, queryParamsRepassed, urlParamsRepassed) {
+    var queryParams = typeof queryParamsRepassed == "undefined" ? {} : queryParamsRepassed; //passed in after the ? e.g /students?orderBy=desc&gropuBy=classroom
+    var urlParams = typeof urlParamsRepassed == "undefined" ? {} : urlParamsRepassed;  //passed in as :paramName  e.g /students/23 from the urlTemplate /students/:id
+
 
     //extract the query params from the url
     var urlParts = url.split("?");
@@ -310,7 +313,7 @@ pxp.router.goToRoute = function (url, data) {
     // console.log("found config route  ", foundConfiguredRoute, urlParams);
     if (foundConfiguredRoute != null && Object.hasOwnProperty.call(foundConfiguredRoute, "redirectsTo")) {
         //redirect 
-        pxp.router.goToRoute(foundConfiguredRoute.redirectsTo, data);
+        pxp.router.goToRoute(foundConfiguredRoute.redirectsTo, data, queryParams, urlParams);
     } else if (foundConfiguredRoute != null) {
         var pageTitle = "";
         if (Object.hasOwnProperty.call(foundConfiguredRoute, "title")) {
@@ -321,6 +324,68 @@ pxp.router.goToRoute = function (url, data) {
 
         history.pushState({ link: url }, pageTitle, '/#' + url);
         pxp.router.goToPage(foundConfiguredRoute.pageName, data, queryParams, urlParams);
+    }
+};
+
+//This method is not to be called from the outside
+//its called internally by pxp to load the page
+//Here though before a page is loaded if it has a master page layout, its layout will first
+//be loaded then the actuall page is loaded
+//Its will finall call the internal method called render page to 
+//finally insert the page into the pxp-app container element
+//It will also sets the currentPage and currentPage name variables
+/**
+ * 
+ * @param {string} name     The name of the page to load
+ * @param {*} data          The data passed to it from an external source
+ * @param {*} queryParams   The data in the url params after the ?
+ * @param {*} urlParams     The parameters data in the url template
+ */
+pxp.router.goToPage = function (name, data, queryParams, urlParams) {
+    // console.log("We are gona load this page ");
+    // console.log("name:", name);
+    // console.log("data:", data);
+    // console.log("queryParams:", queryParams);
+    // console.log("urlParams:", urlParams);
+    if (Object.hasOwnProperty.call(pxp.pages, name)) {
+        var pageToLoad = pxp.pages[name];
+        //check if it has a master page
+        if (Object.hasOwnProperty.call(pageToLoad, "masterPage") && pageToLoad.masterPage.length > 0) {
+            //get the masterpage asked for
+            if (Object.hasOwnProperty.call(pxp.pages, pageToLoad.masterPage)) {
+                var masterPageConfig = pxp.pages[pageToLoad.masterPage];
+                //check if master page is already loaded
+                if (Object.hasOwnProperty.call(masterPageConfig, "placeholderId") && masterPageConfig.placeholderId.length > 0) {
+                    var placeholderId = masterPageConfig.placeholderId;
+                    if ($("#" + placeholderId).length > 0) {
+                        //console.log("big tips ", placeholderId, pageToLoad);
+                        //this master page is already loaded
+                        pxp.currentPageName = pageToLoad.name;
+                        currentPage = pxp.pages[pxp.currentPageName];
+                        pxp.router.renderPage(pageToLoad, placeholderId, data, queryParams, urlParams);
+                    } else {
+                        pxp.router.renderPage(masterPageConfig, pxp.elementId, data, queryParams, urlParams);
+                        pxp.currentPageName = pageToLoad.name;
+                        currentPage = pxp.pages[pxp.currentPageName];
+                        pxp.router.renderPage(pageToLoad, placeholderId, data, queryParams, urlParams);
+                    }
+                } else {
+                    console.error("!Orror: master page " + pageToLoad.masterPage + " is missing property placeholderId, it should have a unique value in the entire application dom");
+                    return false;
+                }
+            } else {
+                console.error("!Orror: master page " + pageToLoad.masterPage + " required for the child page " + name + " was not registered via pxp.createPage");
+                return false;
+            }
+        } else {
+            //no master page
+            pxp.currentPageName = pageToLoad.name;
+            currentPage = pxp.pages[pxp.currentPageName];
+            pxp.router.renderPage(pageToLoad, pxp.elementId, data, queryParams, urlParams);
+        }
+    } else {
+        console.error("!Orror: page " + name + " not registered via pxp.createPage");
+        return false;
     }
 };
 
@@ -341,7 +406,7 @@ pxp.router.goToRoute = function (url, data) {
  * @param {string} insertInId The id of the dome element where the page template is to be inserted
  * @param {object} data The data passed along
  * @param {object} queryParams The query parameters from the url after the ?
- * @param {object} urlParams the url params  from the urlTemplate in the route
+ * @param {*} urlParams the url params  from the urlTemplate in the route
  */
 pxp.router.goToPage.renderPage = function(pageToLoadConfig, insertInId, data, queryParams, urlParams) {
     //no master page
@@ -373,8 +438,3 @@ pxp.router.goToPage.renderPage = function(pageToLoadConfig, insertInId, data, qu
     }
     pageToLoadConfig.onInserted(data, queryParams, urlParams);
 }
-
-
-
-
-
