@@ -180,26 +180,49 @@ pxp.router.beforeEnter= null;
      ]);
      ...
 */
+//When setRoutes is called with a list of routes they are temprarily stored and there processing
+//is defered untill the run method is called, this gives the flexibility to the consumer
+//to define the pxp.router.beforeEnter method either before setting up routes or after
+//without deferring there would be undesired bad things because routes are dependent on the state of 
+//the pxp.router.beforeEnter variable.
 //nyd - Not Yet Done
 //Note that we dont have the notion of nested routes yet
 pxp.router.setRoutes = function (list) {
-    for (var index = 0; index < list.length; index++) {
-        var item = list[index];
-        //a default page name if the route config is missing the pageName property
-        var pageName = 'routeIndex' + index + 'Page';
-        if (Object.hasOwnProperty.call(item, "pageName")) {
-            pageName = item.pageName;
+    if(typeof list == 'object'){
+        pxp.router.rawRoutesList = list;
+    }else{
+        list = pxp.router.rawRoutesList;
+        for (var index = 0; index < list.length; index++) {
+            var item = list[index];
+            var pageName = 'routeIndex' + index + 'Page';
+            if (Object.hasOwnProperty.call(item, "pageName")) {
+                pageName = item.pageName;
+            }
+            //beforeEnter
+            if(typeof pxp.router.beforeEnter == 'function'){  
+                //this means that, the user defined a before Enter for all routes
+                if (Object.hasOwnProperty.call(item, "beforeEnter") == false) {
+                    //if this route has no beforeEnter property it means we need to subscribe it there
+                    item.beforeEnter = true;
+                }
+            }else{
+                //this means that the user has not defined a global before enter 
+                if (Object.hasOwnProperty.call(item, "beforeEnter") == false) {
+                    //the user has not provided a beforeEnter on the route
+                    //we just say that its false
+                    item.beforeEnter = false;
+                }
+            }
+
+            if (item.urlTemplate == "*") { //catch all route
+                pxp.router.catchAllRoute = item;
+                continue;
+            }
+            pxp.router.routeTable[pageName] = item;
         }
-        //catch all route
-        if (item.urlTemplate == "*") {
-            pxp.router.catchAllRoute = {
-                pageName: item
-            };
-            continue;
-        }
-        pxp.router.routeTable[pageName] = item;
     }
 };
+
 
 //refreshing the current page
 //will cause the browser to reload
