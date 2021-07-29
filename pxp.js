@@ -476,3 +476,42 @@ pxp.router.goToPage.renderPage = function(pageToLoadConfig, insertInId, data, qu
     }
     pageToLoadConfig.onInserted(data, queryParams, urlParams);
 }
+
+
+
+//5. Starting The PXP APP - The run method
+//To run a pxp application this method is called, it expects an Id of the dom element where the app is to be placed
+//by default this is set to "pxp-app"
+//The run method will fetch the currrent browser location and prepare some navigation aspects before 
+//calling the pxp.router.gotoRoute
+/**
+ * 
+ * @param {string} elementId The id of the element where the app is to be inserted
+ */
+pxp.run = function (elementId) {
+    if (typeof elementId != 'undefined') {
+        this.elementId = elementId;
+    }
+    //set up the routes
+    pxp.router.setRoutes(true);
+    window.addEventListener('popstate', function (event) {
+        var currentUrl = window.location.hash;
+        if (currentUrl == "") {
+            currentUrl = "/";
+        } else {
+            currentUrl = currentUrl.replace("#", "");
+        }
+        pxp.router.goToRoute(currentUrl, event.state);
+    });
+    var currentUrl = window.location.hash;
+    if (currentUrl == "") {
+        currentUrl = "/";
+        //check if we have any ?
+        if(window.location.href.indexOf("?") > 0){
+            currentUrl = "/?" + (window.location.href.split("?"))[1];
+        }
+    } else {
+        currentUrl = currentUrl.replace("#", "");
+    }
+    pxp.router.goToRoute(currentUrl, { payload: true });
+}
