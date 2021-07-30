@@ -600,4 +600,98 @@ pxp.createCmp = function (config) {
     }
     pxp.cmps[config.name] = config;
 };
-    
+
+//to have one way binding to inputs elements so that when a model property can be bound to an input element
+/*
+  <input model="@pg.createForm.name" />
+  will bind this form to a pxp.pages.userPage.createForm.name within a context
+  ...
+  {
+    createForm: {
+      name: ""
+    }
+  }
+  ...
+*/
+// nyd
+// provide more explanation details for these concepts below
+//a custome getValue method can be hooked up 
+// you can force pxp to return the value corsed as a specific type useing parse Attribute
+// you can provide a call back function after the value is set on an input using onSetValue
+/**
+/ @param {string} context A selector string e.g #id .class etc
+*/
+pxp.bindInputs = function (context) {
+    if (typeof context == "undefined") {
+        context = "";
+    }
+    var inputs = $(context + " input[model], " + context + " select[model]");
+    if (inputs.length > 0) {
+
+        inputs.each(function (index, element) {
+            var target = $(element);
+            //remove previous bindings to change
+            target.off("change");
+            //add this binding
+            target.on("change", function (event) {
+                var thisInput = $(event.target);
+                var model = thisInput.attr("model");
+                var val = thisInput.val();
+                if (typeof val == 'string') {
+                    val = val.trim();
+                }
+
+                //check if we have overriding getValue 
+                var getValue = thisInput.attr("getValue");
+                if (typeof getValue !== 'undefined' && getValue !== false) {
+                    if (typeof getValue == "string") {
+                        if (getValue.indexOf("(") >= 0) {
+                            getValue = (getValue.split("("))[0];
+                        }
+                        var t_g_t_temp_pxp1123 = event.target;
+                        var vmExec = getValue + "(t_g_t_temp_pxp1123);";
+                        val = eval(vmExec);
+                    } else if (typeof getValue == 'function') {
+                        val = getValue(event.target);
+                    }
+                }
+
+                var parse = thisInput.attr("parse");
+                if (typeof parse !== 'undefined' && parse !== false) {
+                    if (parse == 'int') {
+                        val = parseInt(val);
+                    }
+                    if (parse == 'bool' || parse == 'boolean') {
+                        var trueStrs = ["on", "yes", "true", "ok", "1"];
+                        if (typeof val == 'boolean') {
+                            val = val;
+                        } else if (typeof val == 'string' && trueStrs.indexOf(val.toLowerCase().trim()) >= 0) {
+                            val = true;
+                        } else {
+                            val = false;
+                        }
+                    }
+                }
+
+                // console.log("on bing change ", model, val);
+                var assign = model + " = val;";
+                eval(assign);
+
+                //if onSetValue
+                var onSetValue = thisInput.attr("onSetValue");
+                if (typeof onSetValue !== 'undefined' && onSetValue !== false) {
+                    if (typeof onSetValue == "string") {
+                        if (onSetValue.indexOf("(") >= 0) {
+                            onSetValue = (onSetValue.split("("))[0];
+                        }
+                        var e_v_n = new Event("onSetValue");
+                        var vmExec = onSetValue + "(e_v_n,val);";
+                        eval(vmExec);
+                    } else if (typeof onSetValue == 'function') {
+                        onSetValue(new Event("onSetValue"), val);
+                    }
+                }
+            });
+        });
+    }
+};
