@@ -695,3 +695,56 @@ pxp.bindInputs = function (context) {
         });
     }
 };
+
+//when editing we may want to auto fill our inputs with data from a model
+//this method does that, it howver works for only inputs with the model attribute set to a 
+//path of the bound variable
+/**
+ * 
+ * @param {string} wrapperId The id of form elements container
+ * @param {Object} overrideModel Optional - a model to override the default source of the values
+ */
+pxp.fillInputs = function(wrapperId, overrideModel) {
+    if (typeof overrideModel == "undefined") {
+        overrideModel = {};
+    }
+    var cntxt = "";
+    if (wrapperId[0] == "#") {
+        cntxt = wrapperId;
+    } else {
+        cntxt = "#" + wrapperId;
+    }
+    var inputs = $(cntxt + " input[model], " + cntxt + " select[model] ");
+    if (inputs.length > 0) {
+        inputs.each(function (index, element) {
+            var target = $(element);
+            var modelPath = target.attr("model");
+            var modelPathParts = modelPath.split(".");
+            var lastPathPart = modelPathParts.length > 0 ? modelPathParts[modelPathParts - 1] : "";
+            var assignValue = undefined;
+            if (Object.hasOwnProperty.call(overrideModel, lastPathPart)) {
+                //we can override
+                assignValue = overrideModel[lastPathPart];
+            } else {
+                assignValue = eval(modelPath);
+            }
+            //if setValue
+            var setValue = target.attr("setValue");
+            if (typeof setValue !== 'undefined' && setValue !== false) {
+                if (typeof setValue == "string") {
+                    if (setValue.indexOf("(") >= 0) {
+                        setValue = (setValue.split("("))[0];
+                    }
+                    var e_v_n_t = target[0];
+                    var vmExec = setValue + "(e_v_n_t,assignValue);";
+                    eval(vmExec);
+                } else if (typeof setValue == 'function') {
+                    setValue(target[0], assignValue);
+                }
+            } else {
+                target.val(assignValue);
+            }
+        });
+    }
+};
+
