@@ -538,3 +538,66 @@ pxp.run = function (elementId) {
     }
     pxp.router.goToRoute(currentUrl, { payload: true });
 }
+
+
+
+//6. Components
+//components a the smallest building blocks, 
+//they use functions that return a string of html given an input configuration
+//ideally they are not supposed to keep track of state/any data 
+//In case a components needs to manipulate dom elements then its registered  
+//as an object in the pxp.cmps variable so as to group functionality that manuplates instances of that component
+//each component has a unique name
+//as a convention components end with a "Cmp"
+//component files should be placed inside of a components folder and end with "Cmp.js"
+
+//a global registry of the application components
+pxp.cmps = {};
+
+//to create a component call the pxp.createCmp method
+//for example
+/*
+  pxp.createCmp({
+    name: "helloCmp",
+    getTemplate: function(config){
+      return "<div>Hallo " + config.firstName + "</div>";
+    }
+  });
+  //to use this component in several places
+  pxp.cmps.helloCmp.getTemplate({firstName: "Sam" }); //out puts <div>Hallo Sam</div>
+  
+  //also we can have function only components if no common component manipulation functionality is requeired
+  var helloCmp = function(config){
+    return '<div id="'+config.id+'" >Hallo <span>' + config.firstName + '<span></div>';
+  };
+  //when we need to use it
+  helloCmp({id:23, firstName: "Sam" }); //out puts <div id="23">Hallo Sam</div>
+  
+  //now we can have both pxp comps and stand alone functiona at the smae time
+  //we can also group all methods thats work on these component under this name space pxp.cmps.helloCmp
+  pxp.createCmp({
+    name: "helloCmp",
+    getTemplate: function(config){
+      return helloCmp(config);
+    },
+    setName: function(person){
+      $("#" + person.id + " span").html(person.firstName);
+    }
+  });
+  
+  //now when we can have several components
+  helloCmp({id:23, firstName: "Sam" });
+  helloCmp({id:24, firstName: "Lydia" });
+  helloCmp({id:25, firstName: "Peter" });
+  //when we need to manipulate we can then call one of the functions in the compents namesapce
+  pxp.cmps.helloCmp.setName({id:24, firstName: "Roselyn" });
+*/
+pxp.createCmp = function (config) {
+    if (Object.hasOwnProperty.call(config, "onInserted") == false) {
+        config.onInserted = function () {
+            return false;
+        };
+    }
+    pxp.cmps[config.name] = config;
+};
+    
