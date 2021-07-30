@@ -748,3 +748,25 @@ pxp.fillInputs = function(wrapperId, overrideModel) {
     }
 };
 
+//to auto replace short hands, and bind and fill inputs this convenince method can be called
+//especiall luse full when the content is insetred dynamically during running of the app
+/**
+ * 
+ * @param {string} context the wraper select query string
+ * @param {*} content the html content
+ * @param {*} fillModel a model to get values from, in case of overriding needs
+ * @param {*} callback Optional - a call back to be called when its done
+ */
+pxp.render = function (context, content, fillModel, callback) {
+    if (typeof callback == 'undefined') {
+        callback = function () { };
+    }
+    if (content.indexOf("@pg.")) {
+        content = content.split("@pg.").join("pxp.pages." + ola.currentPageName + ".");
+    }
+    $(context).html(content);
+    this.bindInputs(context);
+    this.fillInputs(context,fillModel);
+    callback();
+}
+
