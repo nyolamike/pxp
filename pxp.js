@@ -779,5 +779,63 @@ pxp.pages = {};
 //pxp keeps track of the name of the current loaded page 
 pxp.currentPageName = "";
 
+//to create a page in pxp we use pxp.createPage(config)
+//- every page must have a unique name and will be in the namesapce pxp.pages.pageName
+//where pageName id the actuall name of your page 
+// -this method makes suer that if the pageConfig object is missing an onInserted property one is
+//atuo created for the page
+//- autoCallSectionsOnInserted by default is set to true if one is not passed along
+//this property tells pxp to automatically call the onInseted method of tits child sections
+//- the creatPage will also hookup an onSectionsInserted method that is called to run
+//all the onInserted methods of its child sections
+//pxp will call this method before finally calling the page's onInserted
+//below is an example of creating a page
+/*
+    pxp.createPage({
+        name: "studentsListPage",
+        masterPage: "mainLayoutPage",
+        getTemplate: function(data, queryParams, urlParams){
+            return "<div>... table of students goes here ...</div>";
+        },
+        onInserted: function(data, queryParams, urlParams){
+            //todo
+            //fetch students data from the backend API
+        }
+    });
+*/
+// the masterPage property tells pxp that this page is to be inseted into a master layout page
+/**
+ *
+ * @param {object} config The configuration object of the page
+ * 
+ */
+pxp.createPage = function (config) {
+    // console.log("Creating page ", config);
+    // console.log(config.getTemplate());
+    if (Object.hasOwnProperty.call(config, "onInserted") == false) {
+        config.onInserted = function (data, queryParams, urlParams) {
+            return false;
+        };
+    }
+    if (Object.hasOwnProperty.call(config, "autoCallSectionsOnInserted") == false) {
+        config.autoCallSectionsOnInserted = true;
+    }
 
+    if (Object.hasOwnProperty.call(config, "onSectionsInserted") == false) {
+        config.onSectionsInserted = function(data, queryParams, urlParams){
+            //first call the child on Inserted onInsertedSectionCalls
+            if (Object.hasOwnProperty.call(this, "onInsertedSectionCalls")) {
+                for (var index = 0; index < this.onInsertedSectionCalls.length; index++) {
+                    var sectionName = this.onInsertedSectionCalls[index];
+                    if (Object.hasOwnProperty.call(this, sectionName)) {
+                        if (Object.hasOwnProperty.call(this[sectionName], "onInserted")) {
+                            (this[sectionName]["onInserted"])(data, queryParams, urlParams);
+                        }
+                    }
+                }
+            }
+        }
+    } 
+    pxp.pages[config.name] = config;
+};
 
