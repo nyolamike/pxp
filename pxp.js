@@ -770,3 +770,14 @@ pxp.render = function (context, content, fillModel, callback) {
     callback();
 }
 
+
+
+//7. Pages
+//a page is a page in pxp.js, it a the whole page for example, Home, about us, gallary etc
+pxp.pages = {};
+
+//pxp keeps track of the name of the current loaded page 
+pxp.currentPageName = "";
+
+
+
