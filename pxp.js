@@ -839,3 +839,13 @@ pxp.createPage = function (config) {
     pxp.pages[config.name] = config;
 };
 
+
+
+//8. sections
+//a single page file quickly becomes blobed with too many functionalities even if you have these
+//separated within components, components for the most part are really small.
+//the page can be further broken down into sections, these accomplish a particular objective
+//usually grouping several components but have a tight link to the page
+//when a section is created before its parent page has been loaded it will be defered or it wont 
+//exist until the parent page has been stored in the pxp.pages namesapace
+pxp.differedSections = {};
