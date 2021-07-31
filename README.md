@@ -68,4 +68,22 @@ to put things into perspective as far as this readme file is concerned
 |-- router.js
 ```
        
+# Roadmap v1.0.0
+- [x] core pxp.js library
+  - [x] global pxp objects
+  - [x] pxp app container
+  - [x] boot scripts
+  - [x] router
+  - [x] starting the pxp app
+  - [x] components
+  - [x]  pages
+  - [ ] sections
+  - [ ] event bus
+  - [ ] utils
+- [ ] pxpHtml library
+- [ ] Readme.md
+- [ ] wiki
+- [ ] contributors
+- [ ] youtube videos
+- [ ] example projects
   
