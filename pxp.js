@@ -849,3 +849,36 @@ pxp.createPage = function (config) {
 //when a section is created before its parent page has been loaded it will be defered or it wont 
 //exist until the parent page has been stored in the pxp.pages namesapace
 pxp.differedSections = {};
+
+//to create a section of a page
+//this methos replaces the original getTemplate of a section with a modified one
+//that does some shorthand replacements
+//if the section has an on inserted method then it it wil be called before the parents on iserted method
+pxp.createSection = function (pageName, config) {
+    if (Object.hasOwnProperty.call(config, "name") == false) {
+        throw "!Orror. A page section must have a name, failed to add section to page " + pageName;
+        return false;
+    }
+    if (Object.hasOwnProperty.call(pxp.pages, pageName) == true) {
+        if (Object.hasOwnProperty.call(config, "getTemplate") == true) {
+            config.innerGetTemplate = config.getTemplate;
+            config.getTemplate = function (configTemp) {
+                var content = this.innerGetTemplate(configTemp);
+                content = content.split("@pgx.").join("pxp.pages." + pageName + "." + this.name + ".");
+                return content;
+            };
+        }
+        if (Object.hasOwnProperty.call(config, "onInserted") == true) {
+            if (Object.hasOwnProperty.call(pxp.pages[pageName], "onInsertedSectionCalls") == false) {
+                pxp.pages[pageName]["onInsertedSectionCalls"] = [];
+            }
+            pxp.pages[pageName]["onInsertedSectionCalls"].push(config.name);
+        }
+        pxp.pages[pageName][config.name] = config;
+    } else {
+        //nyd
+        //differ this section untill the page configuration is loaded
+        //pxp.differedSections[pageName] = 
+        throw "!Orror. Cannot add section to a missing page/ or a page which is not yet loaded :" + pageName + ", section " + config.name;
+    }
+};
