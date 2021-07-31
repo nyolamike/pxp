@@ -87,3 +87,7 @@ to put things into perspective as far as this readme file is concerned
 - [ ] youtube videos
 - [ ] example projects
   
+  # Feature Sugestions
+  1.loading in of .html templates
+  2.@scx.title short hand syntax
+  3.lazy loading of resources or on demand loading of resources
