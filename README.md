@@ -19,11 +19,53 @@ First include jquery before you include pxp
     <script src="js/pxp/pxp.min.js"></script>
     <script src="js/pxp/pxpHtml.min.js"></script>
     
+    <!-- application scripts -->
+    <!-- the home page   -->
+    <script src="pages/homePage/index.js"></script>
+    
+    <!-- application routes   -->
+    <script src="router.js"></script>
+    
     <script>
       $(function(){
-          //your applications js goes here or in an external file
+          //run the pxp app
+          pxp.run("pxp-app");
       });
     </script>
  </body>
 </html>
 ```
+
+# Project Folder Structure
+pxp does not impose a certain way that you should organise your project files, the structure below is just an example 
+to put things into perspective as far as this readme file is concerned
+
+```bash
+|-- css 
+|
+|-- js 
+|   |
+|   |--pxp  
+|   |  |    
+|   |  |--pxp.min.js
+|   |  |             
+|   |  |--pxpHtml.min.js 
+|   |  
+|   |--jquery 
+|      | 
+|      |-- jquery.min.js 
+|
+|-- components
+|
+|-- pages
+|   |
+|   |--homePage
+|      |
+|      |--index.js
+|       
+|-- index.html
+|
+|-- router.js
+```
+       
+  
