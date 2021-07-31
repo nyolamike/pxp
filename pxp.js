@@ -762,7 +762,7 @@ pxp.render = function (context, content, fillModel, callback) {
         callback = function () { };
     }
     if (content.indexOf("@pg.")) {
-        content = content.split("@pg.").join("pxp.pages." + ola.currentPageName + ".");
+        content = content.split("@pg.").join("pxp.pages." + pxp.currentPageName + ".");
     }
     $(context).html(content);
     this.bindInputs(context);
