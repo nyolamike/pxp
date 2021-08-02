@@ -81,6 +81,9 @@ to put things into perspective as far as this readme file is concerned
   - [ ] event bus
   - [ ] utils
 - [ ] pxpHtml library
+- [ ] publishing 
+  - [ ] npm
+  - [ ] cdn
 - [ ] Readme.md
 - [ ] wiki
 - [ ] contributors
