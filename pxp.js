@@ -912,3 +912,32 @@ pxp.createEvent = function (eventName, context, defaultFn) {
     };
 };
 
+//inside functions or methods events can be emitted
+//if the event was not created before then nothing will happen
+//the default function associated with the even is called first with a payload from the event source/generator
+//then all subscribers to this event that fit within the same context are alerted by executing their associated calls with the payload
+//and subscription associated data
+pxp.emitEvent = function (eventName, payLoad) {
+    if (Object.hasOwnProperty.call(this.globalEvents, eventName)) {
+        var event = this.globalEvents[eventName];
+        //run default fn
+        event.defaultFn(payLoad);
+        //alert the subscribers that this event has happened
+        for (var index = 0; index < event.subscribers.length; index++) {
+            var subscriber = event.subscribers[index];
+            if (event.context == "*") {
+                //no filters on the event side
+                if (subscriber.context == null || subscriber.context == "*") {
+                    //the subscriber should also have no feelings attached
+                    subscriber.handler(subscriber.data, payLoad, context);
+                }
+            } else {
+                //excute if contexts are the same
+                if (event.context == subscriber.context) {
+                    subscriber.handler(subscriber.data, payLoad, context);
+                }
+            }
+        }
+    }
+},
+
