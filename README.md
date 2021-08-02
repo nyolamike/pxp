@@ -77,7 +77,7 @@ to put things into perspective as far as this readme file is concerned
   - [x] starting the pxp app
   - [x] components
   - [x]  pages
-  - [ ] sections
+  - [x] sections
   - [ ] event bus
   - [ ] utils
 - [ ] pxpHtml library
