@@ -952,5 +952,25 @@ pxp.emitEvent = function (eventName, payLoadPassedAlong) {
     }
 };
 
+//to subscribe to events, it required to pass a unique key identiier for the subscriber
+/**
+ * 
+ * @param {string} key the unique name of the subscriber
+ * @param {string} eventName The name of the event
+ * @param {any} data the data that will be passed back to you when the event occurs
+ * @param {string} context the execution context
+ * @param {*} handler the event handler function
+ */
+pxp.subscribeToEvent = function (key, eventName, data, context, handler) {
+    if (Object.hasOwnProperty.call(this.globalEvents, eventName)) {
+        this.globalEvents[eventName].subscribers.push({
+            key: key,
+            data: data,
+            handler: handler,
+            context: context
+        });
+    }
+};
+
 
 
