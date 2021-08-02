@@ -959,7 +959,7 @@ pxp.emitEvent = function (eventName, payLoadPassedAlong) {
  * @param {string} eventName The name of the event
  * @param {any} data the data that will be passed back to you when the event occurs
  * @param {string} context the execution context
- * @param {*} handler the event handler function
+ * @param {function} handler the event handler function
  */
 pxp.subscribeToEvent = function (key, eventName, data, context, handler) {
     if (Object.hasOwnProperty.call(this.globalEvents, eventName)) {
