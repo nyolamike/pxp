@@ -91,6 +91,7 @@ to put things into perspective as far as this readme file is concerned
 - [ ] example projects
   
   # Feature Sugestions
-  1.loading in of .html templates
-  2.@scx.title short hand syntax
-  3.lazy loading of resources or on demand loading of resources
+  1.loading in of .html templates <br/>
+  2.@scx.title short hand syntax  <br/>
+  3.lazy loading of resources or on demand loading of resources <br/>
+  4.context name spacing in events to allow different sections define the same name for an event but registered in a separate context e.g eventName_context  <br/>
