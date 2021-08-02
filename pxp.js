@@ -972,5 +972,27 @@ pxp.subscribeToEvent = function (key, eventName, data, context, handler) {
     }
 };
 
+//to unsubscribe from an event
+/**
+ * 
+ * @param {string} key the subscribers unique name
+ * @param {string} eventName the event name
+ */
+pxp.unSubscribeFromEvent = function (key, eventName) {
+    if (Object.hasOwnProperty.call(this.globalEvents, eventName)) {
+        var subs = this.globalEvents[eventName].subscribers;
+        var indeAt = -1;
+        for (var index = 0; index < subs.length; index++) {
+            var sub = subs[index];
+            if (sub.key == key) {
+                indeAt = index;
+                break;
+            }
+        }
+        if (indeAt != -1) {
+            this.globalEvents[eventName].subscribers.splice(indeAt, 1);
+        }
+    }
+};
 
 
