@@ -882,3 +882,14 @@ pxp.createSection = function (pageName, config) {
         throw "!Orror. Cannot add section to a missing page/ or a page which is not yet loaded :" + pageName + ", section " + config.name;
     }
 };
+
+
+
+//8. Event Bus
+//the event bus system in pxp is a publish subscribe design to allow a more scallable
+//architecture of communication between different sections and componente of a loaded page
+//global events stores published events
+pxp.globalEvents =  {};
+
+
+
