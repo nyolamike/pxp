@@ -891,5 +891,24 @@ pxp.createSection = function (pageName, config) {
 //global events stores published events
 pxp.globalEvents =  {};
 
-
+//a page or section or anything really can create an event
+/**
+ * 
+ * @param {string} eventName The name of the string
+ * @param {string} context Optional, The name of the context in which this event operates, default is * which means global
+ * @param {function} defaultFn Optional. The default function associated with the event
+ */
+pxp.createEvent = function (eventName, context, defaultFn) {
+    if (typeof context == 'undefined') {
+        context = "*";
+    }
+    if (typeof defaultFn == 'undefined') {
+        defaultFn = function (params) { };
+    }
+    this.globalEvents[eventName] = {
+        subscribers: [],
+        context: context,
+        defaultFn: defaultFn
+    };
+};
 
