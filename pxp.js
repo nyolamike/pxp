@@ -917,7 +917,18 @@ pxp.createEvent = function (eventName, context, defaultFn) {
 //the default function associated with the even is called first with a payload from the event source/generator
 //then all subscribers to this event that fit within the same context are alerted by executing their associated calls with the payload
 //and subscription associated data
-pxp.emitEvent = function (eventName, payLoad) {
+//the data passed along is cloned so that subscribers dont alter the orignal data and spoil its integrity for other subscribers
+/**
+ * 
+ * @param {string} eventName The name of the event to be emitted
+ * @param {any} payLoadPassedAlong any data to send along
+ */
+pxp.emitEvent = function (eventName, payLoadPassedAlong) {
+    var payLoad = null;
+    //make a deep data only copy of the payload
+    if(typeof payLoadPassedAlong != "undefined"){
+        payLoad = JSON.parse(JSON.stringify(payLoadPassedAlong));
+    }
     if (Object.hasOwnProperty.call(this.globalEvents, eventName)) {
         var event = this.globalEvents[eventName];
         //run default fn
@@ -939,5 +950,7 @@ pxp.emitEvent = function (eventName, payLoad) {
             }
         }
     }
-},
+};
+
+
 
