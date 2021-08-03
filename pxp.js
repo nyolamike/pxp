@@ -995,7 +995,7 @@ pxp.unSubscribeFromEvent = function (key, eventName) {
     }
 };
 
-//8. Utils
+//9. Utils
 //some common functions that used frequently
 /**
 * This will pick an item from a list whose value of a property (default id) is equal to the value searched for
@@ -1018,4 +1018,60 @@ pxp.pick = function (itemId, list, prop) {
     return item;
 };
 
+/**
+ * Its sets the values of properties of the toBeFilledObj usings 
+ * a valueSourceObj has the source of values.
+ * It doesnt modify the toBeFilledObj but will return a new copy
+ * @param {object} toBeFilledObj 
+ * @param {object} valueSourceObj 
+ */
+pxp.setValues = function (toBeFilledObj, valueSourceObj) {
+    var newObjec = {};
+    for (var key in toBeFilledObj) {
+        if (Object.hasOwnProperty.call(toBeFilledObj, key) &&
+            Object.hasOwnProperty.call(valueSourceObj, key)
+        ) {
+            newObjec[key] = valueSourceObj[key];
+        } else {
+            newObjec[key] = toBeFilledObj[key];
+        }
+    }
+    return newObjec;
+};
+/**
+ * 
+ * @param {Sting,Number} val Adds commas
+ */
+pxp.comma = function(val) {
+    //https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+    var t = parseFloat(val);
+    var bt = t.toLocaleString();
+    return bt;
+};
+/**
+ * returns true if the string is a valid numeric number
+ * https://stackoverflow.com/questions/175739/built-in-way-in-javascript-to-check-if-a-string-is-a-valid-number
+ * @param {string} str the string to validate
+ */
+pxp.isNumericSt = function (str) {
+    if (typeof str != "string") {
+        return false // we only process strings!
+    }
+    //replace all commas
+    str = str.split(",").join("");
+    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+};
+/**
+ * 
+ * @param {string} str Converts a string number into a Number type, the string number could have commas whih will be replaced
+ */
+pxp.strToNumericValue = function (str) {
+    if (typeof str != "string") {
+        return NaN; // we only process strings!
+    }
+    //replace all commas
+    str = str.trim().split(",").join("").split(" ").join("");
+    return parseFloat(str);
+};
 
