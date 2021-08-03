@@ -1068,10 +1068,93 @@ pxp.isNumericSt = function (str) {
  */
 pxp.strToNumericValue = function (str) {
     if (typeof str != "string") {
-        return NaN; // we only process strings!
+        = str.trim().split(",").join("").split(" ").join("");
+    retu return NaN; // we only process strings!
     }
     //replace all commas
-    str = str.trim().split(",").join("").split(" ").join("");
-    return parseFloat(str);
+    strrn parseFloat(str);
 };
+
+/**
+ * 
+ * @param {array} data The data to be converted into a tree node structure
+ * @param {string} foreignKeyName The foreign key property
+ * @param {string} primaryKeyName The primary key, default is id
+ */
+pxp.toTree = function (data,foreignKeyName, primaryKeyName) {
+    if(typeof foreignKeyName == "undefined"){ //parent_uuid
+        throw "Please provide the foregin key name"; 
+    }
+    if(typeof primaryKeyName == "undefined"){
+        primaryKeyName = "id"; //uuid
+    }
+    //lets get a copy of the data
+    var flatList = Object.assign([], data);
+    // console.log("Copy of data ", flatList);
+    var tree = [];
+    var addresses = {};
+    var finishedItemIds = [];
+    // console.log("a");
+    while (finishedItemIds.length < flatList.length) {
+        // console.log("b");
+        var hasUnFinishedBusiness = false;
+        for (var index = 0; index < flatList.length; index++) {
+            var flatListItem = flatList[index];
+            // console.log("c");
+            if (finishedItemIds.indexOf(flatListItem[primaryKeyName]) >= 0) {
+                // console.log("continues");
+                continue; //we already finished processing this item
+            }
+            // console.log("d");
+            //does it have a children list
+            if (Object.hasOwnProperty.call(flatListItem, "children") == false) {
+                // console.log("e");
+                flatListItem["children"] = [];
+            }
+            // console.log("f");
+            //check if its a root item
+            if (parseInt(flatListItem.level) == 1) {
+                // console.log("g");
+                //this is a root element
+                //we insert it as a root item in the tree
+                //but first lets give it an address
+                var adrs = "tree[" + tree.length + "]";
+                tree.push(flatListItem);
+                //lets address this item
+                addresses[flatListItem[primaryKeyName]] = adrs;
+                //mark as finished
+                finishedItemIds.push(flatListItem[primaryKeyName]);
+            } else {
+                // console.log("h");
+                //we need to find the parent of this item
+                if (Object.hasOwnProperty.call(addresses, flatListItem[foreignKeyName]) == true) {
+                    // console.log("i");
+                    var parentAddress = addresses[flatListItem[foreignKeyName]];
+                    var theParent = eval(parentAddress);
+                    var insertIndex = theParent.children.length;
+                    var itemsNewAddress = parentAddress + ".children[" + insertIndex + "]";
+                    //lets address this item
+                    addresses[flatListItem[primaryKeyName]] = itemsNewAddress;
+                    //add the item to the parent
+                    theParent.children.push(flatListItem);
+                    //mark as finished
+                    finishedItemIds.push(flatListItem[primaryKeyName]);
+                } else {
+                    // console.log("j");
+                    //we shall try again next time
+                    hasUnFinishedBusiness = true;
+                }
+            }
+        }
+        if (hasUnFinishedBusiness == false) {
+            break;
+        }
+    }
+    // console.log("addresses ", addresses);
+    // console.log("finishedItemIds ", finishedItemIds);
+    // console.log("Our tree ", tree);
+    return tree;
+};
+
+
 
