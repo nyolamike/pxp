@@ -995,4 +995,27 @@ pxp.unSubscribeFromEvent = function (key, eventName) {
     }
 };
 
+//8. Utils
+//some common functions that used frequently
+/**
+* This will pick an item from a list whose value of a property (default id) is equal to the value searched for
+* @param {any} itemId The value of a property/attribute to look for
+* @param {array} list The list of objects to search from
+* @param {string} prop The name of the property to consider, default is id
+*/
+pxp.pick = function (itemId, list, prop) {
+    if (typeof prop == 'undefined') {
+        prop = "id";
+    }
+    var item = null;
+    for (var index = 0; index < list.length; index++) {
+        var listItem = list[index];
+        if (listItem[prop] == itemId) {
+            item = listItem;
+            break;
+        }
+    }
+    return item;
+};
+
 
