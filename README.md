@@ -78,8 +78,8 @@ to put things into perspective as far as this readme file is concerned
   - [x] components
   - [x]  pages
   - [x] sections
-  - [ ] event bus
-  - [ ] utils
+  - [x] event bus
+  - [x] utils
 - [ ] pxpHtml library
 - [ ] publishing 
   - [ ] npm
